@@ -1,0 +1,29 @@
+{
+  "name": "cultural-festival-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuhammedFahizk/cultural-festival-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MuhammedFahizk/cultural-festival-backend/issues"
+  },
+  "homepage": "https://github.com/MuhammedFahizk/cultural-festival-backend#readme",
+  "dependencies": {
+    "cloudinary": "^2.10.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.0",
+    "multer": "^2.1.1",
+    "quill": "^2.0.3"
+  }
+}
