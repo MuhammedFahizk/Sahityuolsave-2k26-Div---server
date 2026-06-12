@@ -64,13 +64,18 @@ export const getResultByIdForPublic = async (req, res) => {
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(50, parseInt(req.query.limit) || 10);
 
-        const { teamId, group, categoryName, sort = 'newest' } = req.query;
+        const { teamId, group, search, sort = 'newest' } = req.query;
 
         // ── Filter ────────────────────────────────────────────────────────────
         const filter = { published: true };
         if (teamId) filter['entries.teamId'] = teamId;
         if (group) filter.group = { $regex: new RegExp(`^${group}$`, 'i') };
-        if (categoryName) filter.categoryName = { $regex: categoryName, $options: 'i' };
+        if (search) {
+            filter.$or = [
+                { search: { $regex: search, $options: 'i' } },
+                { 'entries.participantName': { $regex: search, $options: 'i' } }
+            ];
+        }
 
         if (req.query.teamType) {
             const matchingTeams = await Team.find({ teamType: req.query.teamType }).select('_id').lean();
@@ -82,12 +87,12 @@ export const getResultByIdForPublic = async (req, res) => {
         // ── Sort ──────────────────────────────────────────────────────────────
         // newest → createdAt desc  (default — no param needed)
         // oldest → createdAt asc
-        // az     → categoryName A–Z
+        // az     → search A–Z
         // number → resultNumber 1–N
         const SORT_MAP = {
             newest: { createdAt: -1 },
             oldest: { createdAt: 1 },
-            az: { categoryName: 1 },
+            az: { search: 1 },
             number: { resultNumber: 1 },
         };
         const sortQuery = SORT_MAP[sort] ?? SORT_MAP.newest;
