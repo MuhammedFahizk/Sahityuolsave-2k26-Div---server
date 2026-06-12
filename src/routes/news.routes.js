@@ -68,7 +68,6 @@ export default router;
 // 6. About Page
 // - Festival name, history, about text
 // - Date, venue, organizer details
-// - SSF Thathoor Sector info
 // - Contact/social links
 
 // Folder Structure — Public Pages

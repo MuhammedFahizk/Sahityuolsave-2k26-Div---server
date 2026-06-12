@@ -35,6 +35,11 @@ const teamSchema = new mongoose.Schema(
       type:    Number,
       default: 0,
     },
+     teamType: {
+      type:    String,
+      enum:    ['sector', 'campus'],
+      default: 'sector',
+    },
   },
   {
     timestamps: true, // auto adds createdAt and updatedAt

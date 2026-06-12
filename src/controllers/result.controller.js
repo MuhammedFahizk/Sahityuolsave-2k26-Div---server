@@ -1,4 +1,4 @@
-import { Result } from '../models/index.js';
+import { Result, Team } from '../models/index.js';
 
 // ── GET ALL RESULTS ──
 // GET /api/results
@@ -61,27 +61,34 @@ export const getResultById = async (req, res) => {
 
 export const getResultByIdForPublic = async (req, res) => {
     try {
-        const page  = Math.max(1, parseInt(req.query.page)  || 1);
+        const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(50, parseInt(req.query.limit) || 10);
 
         const { teamId, group, categoryName, sort = 'newest' } = req.query;
 
         // ── Filter ────────────────────────────────────────────────────────────
         const filter = { published: true };
-        if (teamId)       filter['entries.teamId'] = teamId;
-        if (group)        filter.group             = { $regex: new RegExp(`^${group}$`, 'i') };
-        if (categoryName) filter.categoryName      = { $regex: categoryName, $options: 'i' };
+        if (teamId) filter['entries.teamId'] = teamId;
+        if (group) filter.group = { $regex: new RegExp(`^${group}$`, 'i') };
+        if (categoryName) filter.categoryName = { $regex: categoryName, $options: 'i' };
 
+        if (req.query.teamType) {
+            const matchingTeams = await Team.find({ teamType: req.query.teamType }).select('_id').lean();
+            const ids = matchingTeams.map(t => t._id);
+            filter['entries.teamId'] = filter['entries.teamId']
+                ? { $in: [filter['entries.teamId'], ...ids].flat() }
+                : { $in: ids };
+        }
         // ── Sort ──────────────────────────────────────────────────────────────
         // newest → createdAt desc  (default — no param needed)
         // oldest → createdAt asc
         // az     → categoryName A–Z
         // number → resultNumber 1–N
         const SORT_MAP = {
-            newest: { createdAt:    -1 },
-            oldest: { createdAt:     1 },
-            az:     { categoryName:  1 },
-            number: { resultNumber:  1 },
+            newest: { createdAt: -1 },
+            oldest: { createdAt: 1 },
+            az: { categoryName: 1 },
+            number: { resultNumber: 1 },
         };
         const sortQuery = SORT_MAP[sort] ?? SORT_MAP.newest;
 
@@ -101,12 +108,12 @@ export const getResultByIdForPublic = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            count:  results.length,
+            count: results.length,
             total,
             page,
-            pages:  Math.ceil(total / limit),
+            pages: Math.ceil(total / limit),
             sort,
-            data:   results,
+            data: results,
         });
     } catch (error) {
         console.error('[getResultByIdForPublic]', error);
@@ -159,7 +166,7 @@ export const createResult = async (req, res) => {
             });
         }
 
-        const result = await Result.create({ resultNumber, categoryName, group, entries , resultUrl });
+        const result = await Result.create({ resultNumber, categoryName, group, entries, resultUrl });
 
         // Populate team details before sending response
         await result.populate('entries.teamId', 'name color');
