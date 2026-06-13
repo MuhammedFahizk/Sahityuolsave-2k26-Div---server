@@ -71,6 +71,7 @@ const templateSchema = new mongoose.Schema(
         type: Number,
         required: true,
       },
+      lineGap: { type: Number, default: 28 },
 
       fontSize: {
         type: Number,
@@ -81,6 +82,8 @@ const templateSchema = new mongoose.Schema(
         type: String,
         default: "#000000",
       },
+      teamFontSize: { type: Number, default: 20 },
+      teamColor: { type: String, default: "#ffffff" },
 
       textAlign: {
         type: String,
